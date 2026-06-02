@@ -57,7 +57,8 @@ jobs:
 
       - name: Decode keystore
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" > keystore.b64
+          base64 --decode keystore.b64 > app/release.keystore
 
       - name: Build signed release APK
         run: ./gradlew assembleRelease
