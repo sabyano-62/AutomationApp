@@ -55,17 +55,24 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Decode keystore
+      - name: Generate keystore
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" > keystore.b64
-          base64 --decode keystore.b64 > app/release.keystore
+          keytool -genkey -v \
+            -keystore app/release.keystore \
+            -alias release \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass android \
+            -keypass android \
+            -dname "CN=AutomationApp, OU=Dev, O=AutomationApp, L=City, ST=State, C=US"
 
       - name: Build signed release APK
         run: ./gradlew assembleRelease
         env:
-          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
+          ANDROID_KEYSTORE_PASS: android
+          ANDROID_KEY_ALIAS: release
+          ANDROID_KEY_PASS: android
 
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
